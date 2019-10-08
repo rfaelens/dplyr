@@ -131,7 +131,10 @@ group_map.data.frame <- function(.data, .f, ..., keep = FALSE) {
   group_keys <- map(seq_len(nrow(keys)), function(i) keys[i, , drop = FALSE])
 
   if (length(chunks)) {
-    map2(chunks, group_keys, .f, ...)
+    p <- progress_estimated(length(chunks), min_time = 2)
+    
+    fun <- function(...) {res <- .f(...); p$tick()$print(); res}
+    map2(chunks, group_keys, fun, ...)
   } else {
     # calling .f with .x and .y set to prototypes
     structure(list(), ptype = .f(attr(chunks, "ptype"), keys[integer(0L), ], ...))
